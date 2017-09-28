@@ -2,7 +2,7 @@ $(document).ready(function() {
 
     const articleContainer = $(".article-container");
     initPage();
-    //$(document).on("click", ".comment", handleArticleNotes);
+    $(document).on("click", ".comment", handleArticleNotes);
 
     function initPage() {
         // Empty old articles...
@@ -32,6 +32,13 @@ $(document).ready(function() {
         articleContainer.append(articlePanels);
     }
 
+    function renderComments() {
+        $.get("/api/v1/comments").then((data) => {
+            console.log(data);
+        });
+    }
+    renderComments();
+
     function createPanel(article) {
         var panel = $(
         [
@@ -59,39 +66,25 @@ $(document).ready(function() {
         return panel;
     }
 
-    function handleArticleNotes() {
-        console.log("dsfdsfdsf");
-        const currentArticle = $(this).parents(".panel").data();
-        
-        $.get("/api/notes/" + currentArticle._id).then(function(data) {
-        // Constructing our initial HTML to add to the notes modal
-        var modalText = [
-            "<div class='container-fluid text-center'>",
-            "<h4>Notes For Article: ",
-            currentArticle._id,
-            "</h4>",
-            "<hr />",
-            "<ul class='list-group note-container'>",
-            "</ul>",
-            "<textarea placeholder='New Note' rows='4' cols='60'></textarea>",
-            "<button class='btn btn-success save'>Save Note</button>",
-            "</div>"
-        ].join("");
-        // Adding the formatted HTML to the note modal
-        bootbox.dialog({
-            message: modalText,
-            closeButton: true
-        });
-        var noteData = {
-            _id: currentArticle._id,
-            notes: data || []
-        };
-        // Adding some information about the article and article notes to the save button for easy access
-        // When trying to add a new note
-        $(".btn.save").data("article", noteData);
-        // renderNotesList will populate the actual note HTML inside of the modal we just created/opened
-        renderNotesList(noteData);
-        });
+    function createComment() {
+
     }
 
+    function handleArticleNotes() {
+
+        const thisId = $(this).parent().parent().data("_id");
+        console.log(thisId);
+
+        const commentData = {
+            text: $(this).parent().children("input").val().trim(),
+            articleId: thisId
+        }
+
+        $.post("/api/v1/articles/" + thisId, commentData).then(() => {
+            renderComments();
+        });
+
+        // Also, remove the values entered in the input and textarea for note entry
+        $(".currentComment").val("");
+    }
 });

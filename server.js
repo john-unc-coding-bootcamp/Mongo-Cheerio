@@ -75,7 +75,7 @@ app.get("/api/v1/scrape", (req, res) => {
     });
 });
 
-app.get("/api/v1/articles", function(req, res) {
+app.get("/api/v1/articles", (req, res) => {
     // Get every article...
     Article.find({}, function(error, doc) {
         if (error) { console.log(error); }
@@ -83,10 +83,42 @@ app.get("/api/v1/articles", function(req, res) {
     });
 });
 
-app.post("/api/v1/comment", commentData, () => {
-    
-    const comment = new Comment(commentData);
+app.get("/api/v1/comments", (req, res) => {
+    // Get every comment...
+    Comment.find({}, function(error, doc) {
+        if (error) { console.log(error); }
+        else { res.json(doc); }
+    });
+})
 
+app.get("/api/v1/comments/:id", (req, res) => {
+    // Get every comment...
+    Comment.find({_id:"ObjectId("+req.params.id+")"}, function(error, doc) {
+        if (error) { console.log(error); }
+        else { res.json(doc); }
+    });
+})
+
+app.get("/api/v1/articles/:id", (req, res) => {
+    console.log("hello");
+    Article.findOne({ "_id": req.params.id }).populate("note")
+    .exec(function(error, doc) {
+    // Log any errors
+    if (error) {
+      console.log(error);
+    }
+    // Otherwise, send the doc to the browser as a json object
+    else {
+        console.log(doc);
+      res.json(doc);
+    }
+  });
+});
+
+app.post("/api/v1/articles/:id", (req, res) => {
+    
+    const comment = new Comment(req.body);
+    console.log(comment);
     // Save to mongo
     comment.save((err, doc) => {
         if (err) { console.log(err); } 
